@@ -4,13 +4,16 @@ import datetime
 
 class Category(models.Model):
     name = models.CharField(max_length=50)
-    slug = models.SlugField(max_length=255)
+    slug = models.SlugField(max_length=255, default='default-slug')
     description = models.TextField()
     image = models.ImageField(upload_to='category', null=True, blank=True)
+    parent = models.ForeignKey('self', null=True, blank=True, related_name='children', on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'category'
         verbose_name_plural = 'categories'
+        # To define an ordering and group categories by parent
+        ordering = ['parent__id', 'id']
 
     def __str__(self):
         return self.name
