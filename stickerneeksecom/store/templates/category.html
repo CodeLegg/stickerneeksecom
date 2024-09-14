@@ -12,6 +12,7 @@
 
     <main>
         {% if category %}
+            <!-- Main category-specific products -->
             <section class="category-products">
                 <h2>Products in {{ category.name }}</h2>
                 <ul>
@@ -27,45 +28,23 @@
                     {% endfor %}
                 </ul>
             </section>
-
-            {% if subcategories %}
-                <section class="subcategory-products">
-                    <h2>Subcategories</h2>
-                    <ul>
-                        {% for subcategory in subcategories %}
-                            <li>
-                                <h3>{{ subcategory.name }}</h3>
-                                <ul>
-                                    {% for product in subcategory_products.subcategory %}
-                                        <li>
-                                            <h4>{{ product.name }}</h4>
-                                            <p>{{ product.description }}</p>
-                                            <p>Price: ${{ product.price }}</p>
-                                            <a href="{% url 'product' product.id %}">View Product</a>
-                                        </li>
-                                    {% empty %}
-                                        <p>No products available in this subcategory.</p>
-                                    {% endfor %}
-                                </ul>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </section>
-            {% endif %}
-        {% else %}
-            <section class="top-level-categories">
-                <h2>Top-Level Categories</h2>
+    
+            <!-- Recursive subcategories and their products -->
+            <section class="subcategory-products">
+                <h2>Subcategories</h2>
                 <ul>
-                    {% for category in subcategories %}
-                        <li>
-                            <h3><a href="{% url 'category' category.slug %}">{{ category.name }}</a></h3>
-                            <p>{{ category.description }}</p>
-                        </li>
-                    {% empty %}
-                        <p>No categories available.</p>
-                    {% endfor %}
+                    {% include 'subcategory_recursive.html' with subcategories=subcategory_products %}
                 </ul>
             </section>
+        {% else %}
+            <h2>Top-level Categories</h2>
+            <ul>
+                {% for subcategory in subcategories %}
+                    <li><a href="{% url 'category' subcategory.slug %}">{{ subcategory.name }}</a></li>
+                {% endfor %}
+            </ul>
         {% endif %}
     </main>
+    
+    
 {% endblock %}

@@ -14,30 +14,47 @@ from .models import Category, Product
 def category(request, slug=None):
     category = None
     products = None
-    subcategories = None
+    subcategory_products = []
 
     if slug:
         # Get the selected category by slug
         category = get_object_or_404(Category, slug=slug)
-        # Get all products related to this category and its subcategories
-        products = Product.objects.filter(category=category)  # Products in this category
-
-        # Get subcategories of this category (children)
-        subcategories = category.children.all()
+        # Get all products directly related to this category
+        products = Product.objects.filter(category=category)
         
-        # Optionally, fetch products for all subcategories too
-        all_subcategory_products = Product.objects.filter(category__in=subcategories)
+        # Recursively get all descendants of this category
+        def get_subcategory_products(category):
+            subcategory_products = []
+            subcategories = category.children.all()
+
+            for subcategory in subcategories:
+                # Get products for each subcategory
+                products_for_subcategory = Product.objects.filter(category=subcategory)
+                # Recursively fetch the descendants of this subcategory
+                descendants = get_subcategory_products(subcategory)
+
+                subcategory_products.append({
+                    'subcategory': subcategory,
+                    'products': products_for_subcategory,
+                    'descendants': descendants
+                })
+            return subcategory_products
+
+        # Get all subcategory products recursively for the main category
+        subcategory_products = get_subcategory_products(category)
 
     else:
         # If no slug, show top-level categories (with no parent)
         subcategories = Category.objects.filter(parent__isnull=True)
 
-    return render(request, 'category.html', {
+    context = {
         'category': category,
         'products': products,
-        'subcategories': subcategories,
-        'all_subcategory_products': all_subcategory_products,  # For additional subcategory products
-    })
+        'subcategory_products': subcategory_products,
+    }
+
+    return render(request, 'category.html', context)
+
 
 # product = product.objects.all()
 def home(request):

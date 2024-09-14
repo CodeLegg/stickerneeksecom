@@ -1,0 +1,26 @@
+<ul>
+    {% for item in subcategories %}
+        <li>
+            <h3>{{ item.subcategory.name }}</h3>
+            <ul>
+                {% for product in item.products %}
+                    <li>
+                        <h4>{{ product.name }}</h4>
+                        <p>{{ product.description }}</p>
+                        <p>Price: ${{ product.price }}</p>
+                        <a href="{% url 'product' product.id %}">View Product</a>
+                    </li>
+                {% empty %}
+                    <p>No products available in this subcategory.</p>
+                {% endfor %}
+            </ul>
+
+            <!-- Recursively display descendants if they exist -->
+            {% if item.descendants %}
+                <ul>
+                    {% include 'subcategory_recursive.html' with subcategories=item.descendants %}
+                </ul>
+            {% endif %}
+        </li>
+    {% endfor %}
+</ul>
