@@ -6,18 +6,17 @@ admin.site.site_header = 'Stickerneek Admin'
 admin.site.site_title = 'Stickerneek Admin'
 admin.site.index_title = 'Welcome to Stickerneek Admin'
 
-# Define CategoryAdmin first
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'parent', 'display_hierarchy')
-    list_filter = ('parent',)  # Add filter by parent category
+    list_display = ('name', 'parent', 'display_hierarchy', 'order')
+    list_editable = ('order',)  # Allow editing the 'order' field directly in the list view
+    list_filter = ('parent',)  # Filter by parent category
+    ordering = ['parent__id', 'order']  # Default ordering by parent and then by order
 
     def display_hierarchy(self, obj):
         """ 
         Display categories with an indentation that represents their depth in the hierarchy.
         """
-        if obj.parent:
-            return f"{'--' * self.get_category_depth(obj)} {obj.name}"
-        return obj.name
+        return f"{'--' * self.get_category_depth(obj)} {obj.name}"
 
     def get_category_depth(self, obj):
         """

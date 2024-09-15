@@ -1,6 +1,9 @@
 from django.db import models
 import datetime
 
+# Category / Collections
+
+from django.db import models
 
 class Category(models.Model):
     name = models.CharField(max_length=50)
@@ -8,16 +11,19 @@ class Category(models.Model):
     description = models.TextField()
     image = models.ImageField(upload_to='category', null=True, blank=True)
     parent = models.ForeignKey('self', null=True, blank=True, related_name='children', on_delete=models.CASCADE)
+    order = models.PositiveIntegerField(default=0)  # Field to control the order
 
     class Meta:
         verbose_name = 'category'
         verbose_name_plural = 'categories'
-        # To define an ordering and group categories by parent
-        ordering = ['parent__id', 'id']
+        ordering = ['parent__id', 'order', 'id']  # Order by parent, then order field, then id
 
     def __str__(self):
         return self.name
-    
+
+
+# Customer / User
+
 class Customer(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
@@ -34,6 +40,8 @@ class Customer(models.Model):
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
 
+# Product / Item
+
 class Product(models.Model):        
     name = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=6, decimal_places=2)    
@@ -49,6 +57,8 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+# Order / Transaction
 
 class Order(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
